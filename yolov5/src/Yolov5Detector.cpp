@@ -39,6 +39,12 @@ static inline void nms(std::vector<Yolov5Detector::Object> &vecBoxObjs, float nm
     }
 }
 
+static inline int clamp(int a, int b, int c) {
+    if (a < b) return b;
+    else if (a > c) return c;
+    else return a;
+}
+
 static inline void scaleCoords(const cv::Size& imageShape, cv::Rect& coords, const cv::Size& imageOriginalShape) {
     float gain = std::min((float)imageShape.height / (float)imageOriginalShape.height,
                           (float)imageShape.width / (float)imageOriginalShape.width);
@@ -46,11 +52,11 @@ static inline void scaleCoords(const cv::Size& imageShape, cv::Rect& coords, con
     int pad[2] = {(int) (( (float)imageShape.width - (float)imageOriginalShape.width * gain) / 2.0f),
                   (int) (( (float)imageShape.height - (float)imageOriginalShape.height * gain) / 2.0f)};
 
-    coords.x = (int) std::round(((float)(coords.x - pad[0]) / gain));
-    coords.y = (int) std::round(((float)(coords.y - pad[1]) / gain));
+    coords.x = clamp((int) std::round(((float)(coords.x - pad[0]) / gain)), 0, imageOriginalShape.width);
+    coords.y = clamp((int) std::round(((float)(coords.y - pad[1]) / gain)), 0, imageOriginalShape.height);
 
-    coords.width = (int) std::round(((float)coords.width / gain));
-    coords.height = (int) std::round(((float)coords.height / gain));
+    coords.width = clamp((int) std::round(((float)coords.width / gain)), 0, imageOriginalShape.width);
+    coords.height = clamp((int) std::round(((float)coords.height / gain)), 0, imageOriginalShape.height);
 }
 
 static inline cv::Mat letterbox_image(const cv::Mat& img, int input_w, int input_h) {
